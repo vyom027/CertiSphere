@@ -9,4 +9,9 @@ class Course extends Model {
     use HasFactory;
     
     protected $fillable = ['name', 'image', 'link', 'description'];
+
+    public function courseCategory()
+    {
+        return $this->belongsTo(CourseCategory::class);
+    }
 }

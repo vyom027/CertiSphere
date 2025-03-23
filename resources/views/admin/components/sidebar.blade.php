@@ -91,6 +91,21 @@
           </ul>
         </li>
       
+        <!-- Course Categotry -->
+        <li class="nav-item position-relative">
+          <a class="nav-link toggle-dropdown" href="javascript:void(0);">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-folder-17 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Course Category</span>
+          </a>
+          <!-- Sub-options -->
+          <ul class="sub-options d-none ms-4">
+            <li><a href="{{ route('admin.course_categories.create')}}" class="nav-link"><i class="fas fa-plus"></i>Add Course Category</a></li>
+            <li><a href="{{ route('admin.course_categories.index')}}" class="nav-link"><i class="fas fa-list"></i>Course Category List</a></li>
+          </ul>
+        </li>
+
         <!-- Course -->
         <li class="nav-item position-relative">
           <a class="nav-link toggle-dropdown" href="javascript:void(0);">
@@ -101,8 +116,8 @@
           </a>
           <!-- Sub-options -->
           <ul class="sub-options d-none ms-4">
-            <li><a href="#" class="nav-link"><i class="fas fa-plus"></i>Add Course</a></li>
-            <li><a href="#" class="nav-link"><i class="fas fa-list"></i>Selected Course List</a></li>
+            <li><a href="{{ route('admin.courses.create')}}" class="nav-link"><i class="fas fa-plus"></i>Add Course</a></li>
+            <li><a href="{{ route('admin.courses.index')}}" class="nav-link"><i class="fas fa-list"></i>Selected Course List</a></li>
           </ul>
         </li>
       
@@ -149,6 +164,15 @@
       </ul>
     </div>
   </aside>
+
+  <div class="d-flex align-items-center mt-3">
+    <form action="{{ route('logout') }}" method="POST" class="w-100">
+      @csrf
+      <button type="submit" class="btn btn-danger w-100">
+        <i class="fas fa-sign-out-alt me-2"></i> Logout
+      </button>
+    </form>
+  </div>
 
   <script src="{{asset('admin/js/core/popper.min.js') }}"></script>
   <script src="{{asset('admin/js/core/bootstrap.min.js') }}"></script>

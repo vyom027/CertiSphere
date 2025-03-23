@@ -106,6 +106,15 @@
                                 <label for="description" class="form-label">Description</label>
                                 <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
                             </div>
+                            <div class="mb-3">
+                                <label for="course_category_id" class="form-label">Course Category</label>
+                                <select class="form-select" id="course_category_id" name="course_category_id" required>
+                                    <option value="" disabled selected>Select a category</option>
+                                    @foreach($courseCategories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <button type="submit" class="btn btn-primary">Add Course</button>
                         </form>
                     </div>

@@ -13,10 +13,14 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 class StudentPageController extends Controller
 {
-    public function index()
+    public function __construct()
     {
-        return view('user.index');
+        if (!session()->has('student_logged_in')) {
+            redirect()->route('login-student')->send();
+        }
     }
+    
+    
 
     public function showProfile()
     {

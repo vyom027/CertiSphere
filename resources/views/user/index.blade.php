@@ -22,6 +22,35 @@
 
         <link href="{{ asset('student/css/bootstrap-icons.css')}}" rel="stylesheet">
         <link href="{{ asset('student/css/templatemo-topic-listing.css')}}" rel="stylesheet">      
+<style>
+/* Add styles for the scrollable container */
+.tab-scroll-container {
+    overflow-x: auto;  /* Allows horizontal scrolling */
+    white-space: nowrap;  /* Prevents the tabs from wrapping to a new line */
+    padding-bottom: 10px; /* Adds some space below the tabs */
+}
+
+/* Center the tabs horizontally */
+.navs-tabs {
+    display: flex; /* Ensures the tabs are laid out in a row */
+    justify-content: center; /* Centers the tabs in the container */
+    align-items: center; /* Vertically aligns the tabs */
+    width: 100%;
+}
+
+/* Keep each nav-item from wrapping */
+.navs-item {
+    white-space: nowrap;  /* Prevents the tab name from wrapping */
+    margin: 0 15px;  /* Adds some spacing between tabs */
+}
+
+/* Add space between the active tab and other tabs */
+.navs-link {
+    text-align: center; /* Centers the text inside each tab */
+}
+
+
+</style>
 
     </head>
     
@@ -147,330 +176,181 @@
             </section>
 
 
-            <section class="explore-section section-padding" id="section_2">
-                <div class="container">
-                    <div class="row">
-
-                        <div class="col-12 text-center">
-                            <h2 class="mb-4">Browse Topics</h1>
+          <!-- Browse Topics Section -->
+          <section class="explore-section section-padding" id="section_2">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <h2 class="mb-4">Browse Courses</h2>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <!-- Make this div scrollable -->
+                        <div class="tab-scroll-container">
+                            <ul class="nav navs-tabs nav-tabs" id="myTabBrowse" role="tablist">
+                                @foreach($courseCategories as $category)
+                                    <li class="nav-item" role="presentation">
+                                        <button class="navs-link nav-link {{ $loop->first ? 'active' : '' }}" 
+                                                id="browse-{{ strtolower($category->name) }}-tab" 
+                                                data-bs-toggle="tab" 
+                                                data-bs-target="#browse-{{ strtolower($category->name) }}-tab-pane" 
+                                                type="button" 
+                                                role="tab" 
+                                                aria-controls="browse-{{ strtolower($category->name) }}-tab-pane" 
+                                                aria-selected="false">
+                                            {{ $category->name }}
+                                        </button>
+                                    </li>
+                                @endforeach
+                            </ul>
                         </div>
-
                     </div>
                 </div>
-
-                <div class="container-fluid">
-                    <div class="row">
-                        <ul class="nav nav-tabs" id="myTab" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="design-tab" data-bs-toggle="tab" data-bs-target="#design-tab-pane" type="button" role="tab" aria-controls="design-tab-pane" aria-selected="true">Design</button>
-                            </li>
-
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="marketing-tab" data-bs-toggle="tab" data-bs-target="#marketing-tab-pane" type="button" role="tab" aria-controls="marketing-tab-pane" aria-selected="false">Marketing</button>
-                            </li>
-
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="finance-tab" data-bs-toggle="tab" data-bs-target="#finance-tab-pane" type="button" role="tab" aria-controls="finance-tab-pane" aria-selected="false">Finance</button>
-                            </li>
-
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="music-tab" data-bs-toggle="tab" data-bs-target="#music-tab-pane" type="button" role="tab" aria-controls="music-tab-pane" aria-selected="false">Music</button>
-                            </li>
-
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="education-tab" data-bs-toggle="tab" data-bs-target="#education-tab-pane" type="button" role="tab" aria-controls="education-tab-pane" aria-selected="false">Education</button>
-                            </li>
-                        </ul>
+            </div>
+        
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="tab-content" id="myTabBrowseContent">
+                            @foreach($courseCategories as $category)
+                                <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" 
+                                     id="browse-{{ strtolower($category->name) }}-tab-pane" 
+                                     role="tabpanel" 
+                                     aria-labelledby="browse-{{ strtolower($category->name) }}-tab">
+                                    <div class="position-relative">
+                                        <!-- Left Scroll Button -->
+                                        <button class="scroll-btn left-btn position-absolute start-0 top-50 translate-middle-y"
+                                                onclick="scrollLeft('browse-{{ strtolower($category->name) }}')">
+                                            &#10094;
+                                        </button>
+        
+                                        <!-- Scrollable Container -->
+                                        <div class="row flex-nowrap overflow-auto custom-scroll-container px-5" id="scroll-container-browse-{{ strtolower($category->name) }}">
+                                            @forelse($category->topCourses['elements'] as $course)
+                                                <div class="col-lg-4 col-md-6 col-12 mb-4">
+                                                    <div class="custom-block bg-white shadow-lg">
+                                                        <div class="d-flex">
+                                                            <div>
+                                                                <h5 class="mb-2">{{ $course['name'] ?? 'Default Name' }}</h5>
+                                                            </div>
+                                                            <span class="badge bg-design rounded-pill ms-auto">{{ $loop->index + 1 }}</span>
+                                                        </div>
+                                                        <img src="{{ $course['image'] ?? asset('student/images/topics/default.png') }}" 
+                                                             class="custom-block-image img-fluid" 
+                                                             alt="{{ $course['name'] }}">
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <p class="text-center">No courses available for this category.</p>
+                                            @endforelse
+                                        </div>
+        
+                                        <!-- Right Scroll Button -->
+                                        <button class="scroll-btn right-btn position-absolute end-0 top-50 translate-middle-y"
+                                                onclick="scrollRight('browse-{{ strtolower($category->name) }}')">
+                                            &#10095;
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
-
-                <div class="container">
-                    <div class="row">
-
-                        <div class="col-12">
-                            <div class="tab-content" id="myTabContent">
-                                <div class="tab-pane fade show active" id="design-tab-pane" role="tabpanel" aria-labelledby="design-tab" tabindex="0">
-                                    <div class="row">
-                                        <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-0">
-                                            <div class="custom-block bg-white shadow-lg">
-                                                <a href="topics-detail.html">
-                                                    <div class="d-flex">
-                                                        <div>
-                                                            <h5 class="mb-2">Web Design</h5>
-
-                                                            <p class="mb-0">Topic Listing Template based on Bootstrap 5</p>
-                                                        </div>
-
-                                                        <span class="badge bg-design rounded-pill ms-auto">14</span>
-                                                    </div>
-
-                                                    <img src="{{ asset('student/images/topics/undraw_Remote_design_team_re_urdx.png')}}" class="custom-block-image img-fluid" alt="">
-                                                </a>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-0">
-                                            <div class="custom-block bg-white shadow-lg">
-                                                <a href="topics-detail.html">
-                                                    <div class="d-flex">
-                                                        <div>
-                                                            <h5 class="mb-2">Graphic</h5>
-
-                                                                <p class="mb-0">Lorem Ipsum dolor sit amet consectetur</p>
-                                                        </div>
-
-                                                        <span class="badge bg-design rounded-pill ms-auto">75</span>
-                                                    </div>
-
-                                                    <img src="{{ asset('student/images/topics/undraw_Redesign_feedback_re_jvm0.png')}}" class="custom-block-image img-fluid" alt="">
-                                                </a>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-4 col-md-6 col-12">
-                                            <div class="custom-block bg-white shadow-lg">
-                                                <a href="topics-detail.html">
-                                                    <div class="d-flex">
-                                                        <div>
-                                                            <h5 class="mb-2">Logo Design</h5>
-
-                                                                <p class="mb-0">Lorem Ipsum dolor sit amet consectetur</p>
-                                                        </div>
-
-                                                        <span class="badge bg-design rounded-pill ms-auto">100</span>
-                                                    </div>
-
-                                                    <img src="{{ asset('student/images/topics/colleagues-working-cozy-office-medium-shot.png')}}" class="custom-block-image img-fluid" alt="">
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="tab-pane fade" id="marketing-tab-pane" role="tabpanel" aria-labelledby="marketing-tab" tabindex="0">
-                                    <div class="row">
-                                        <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-3">
-                                                <div class="custom-block bg-white shadow-lg">
-                                                    <a href="topics-detail.html">
-                                                        <div class="d-flex">
-                                                            <div>
-                                                                <h5 class="mb-2">Advertising</h5>
-
-                                                                <p class="mb-0">Lorem Ipsum dolor sit amet consectetur</p>
-                                                            </div>
-
-                                                            <span class="badge bg-advertising rounded-pill ms-auto">30</span>
-                                                        </div>
-
-                                                        <img src="{{ asset('student/images/topics/undraw_online_ad_re_ol62.png')}}" class="custom-block-image img-fluid" alt="">
-                                                    </a>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-3">
-                                                <div class="custom-block bg-white shadow-lg">
-                                                    <a href="topics-detail.html">
-                                                        <div class="d-flex">
-                                                            <div>
-                                                                <h5 class="mb-2">Video Content</h5>
-
-                                                                <p class="mb-0">Lorem Ipsum dolor sit amet consectetur</p>
-                                                            </div>
-
-                                                            <span class="badge bg-advertising rounded-pill ms-auto">65</span>
-                                                        </div>
-
-                                                        <img src="{{ asset('student/images/topics/undraw_Group_video_re_btu7.png')}}" class="custom-block-image img-fluid" alt="">
-                                                    </a>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-lg-4 col-md-6 col-12">
-                                                <div class="custom-block bg-white shadow-lg">
-                                                    <a href="topics-detail.html">
-                                                        <div class="d-flex">
-                                                            <div>
-                                                                <h5 class="mb-2">Viral Tweet</h5>
-
-                                                                <p class="mb-0">Lorem Ipsum dolor sit amet consectetur</p>
-                                                            </div>
-
-                                                            <span class="badge bg-advertising rounded-pill ms-auto">50</span>
-                                                        </div>
-
-                                                        <img src="{{ asset('student/images/topics/undraw_viral_tweet_gndb.png')}}" class="custom-block-image img-fluid" alt="">
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                  </div>
-
-                                <div class="tab-pane fade" id="finance-tab-pane" role="tabpanel" aria-labelledby="finance-tab" tabindex="0">   <div class="row">
-                                        <div class="col-lg-6 col-md-6 col-12 mb-4 mb-lg-0">
-                                            <div class="custom-block bg-white shadow-lg">
-                                                <a href="topics-detail.html">
-                                                    <div class="d-flex">
-                                                        <div>
-                                                            <h5 class="mb-2">Investment</h5>
-
-                                                            <p class="mb-0">Lorem Ipsum dolor sit amet consectetur</p>
-                                                        </div>
-
-                                                        <span class="badge bg-finance rounded-pill ms-auto">30</span>
-                                                    </div>
-
-                                                    <img src="{{ asset('student/images/topics/undraw_Finance_re_gnv2.png')}}" class="custom-block-image img-fluid" alt="">
-                                                </a>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-6 col-md-6 col-12">
-                                            <div class="custom-block custom-block-overlay">
-                                                <div class="d-flex flex-column h-100">
-                                                    <img src="{{ asset('student/images/businesswoman-using-tablet-analysis-graph-company-finance-strategy-statistics-success-concept-planning-future-office-room.jpg')}}" class="custom-block-image img-fluid" alt="">
-
-                                                    <div class="custom-block-overlay-text d-flex">
-                                                        <div>
-                                                            <h5 class="text-white mb-2">Finance</h5>
-
-                                                            <p class="text-white">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Sint animi necessitatibus aperiam repudiandae nam omnis</p>
-
-                                                            <a href="topics-detail.html" class="btn custom-btn mt-2 mt-lg-3">Learn More</a>
-                                                        </div>
-
-                                                        <span class="badge bg-finance rounded-pill ms-auto">25</span>
-                                                    </div>
-
-                                                    <div class="social-share d-flex">
-                                                        <p class="text-white me-4">Share:</p>
-
-                                                        <ul class="social-icon">
-                                                            <li class="social-icon-item">
-                                                                <a href="#" class="social-icon-link bi-twitter"></a>
-                                                            </li>
-
-                                                            <li class="social-icon-item">
-                                                                <a href="#" class="social-icon-link bi-facebook"></a>
-                                                            </li>
-
-                                                            <li class="social-icon-item">
-                                                                <a href="#" class="social-icon-link bi-pinterest"></a>
-                                                            </li>
-                                                        </ul>
-
-                                                        <a href="#" class="custom-icon bi-bookmark ms-auto"></a>
-                                                    </div>
-
-                                                    <div class="section-overlay"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="tab-pane fade" id="music-tab-pane" role="tabpanel" aria-labelledby="music-tab" tabindex="0">
-                                    <div class="row">
-                                        <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-3">
-                                            <div class="custom-block bg-white shadow-lg">
-                                                <a href="topics-detail.html">
-                                                    <div class="d-flex">
-                                                        <div>
-                                                            <h5 class="mb-2">Composing Song</h5>
-
-                                                            <p class="mb-0">Lorem Ipsum dolor sit amet consectetur</p>
-                                                        </div>
-
-                                                        <span class="badge bg-music rounded-pill ms-auto">45</span>
-                                                    </div>
-
-                                                    <img src="{{ asset('student/images/topics/undraw_Compose_music_re_wpiw.png')}}" class="custom-block-image img-fluid" alt="">
-                                                </a>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-3">
-                                            <div class="custom-block bg-white shadow-lg">
-                                                <a href="topics-detail.html">
-                                                    <div class="d-flex">
-                                                        <div>
-                                                            <h5 class="mb-2">Online Music</h5>
-
-                                                            <p class="mb-0">Lorem Ipsum dolor sit amet consectetur</p>
-                                                        </div>
-
-                                                        <span class="badge bg-music rounded-pill ms-auto">45</span>
-                                                    </div>
-
-                                                    <img src="{{ asset('student/images/topics/undraw_happy_music_g6wc.png')}}" class="custom-block-image img-fluid" alt="">
-                                                </a>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-4 col-md-6 col-12">
-                                            <div class="custom-block bg-white shadow-lg">
-                                                <a href="topics-detail.html">
-                                                    <div class="d-flex">
-                                                        <div>
-                                                            <h5 class="mb-2">Podcast</h5>
-
-                                                            <p class="mb-0">Lorem Ipsum dolor sit amet consectetur</p>
-                                                        </div>
-
-                                                        <span class="badge bg-music rounded-pill ms-auto">20</span>
-                                                    </div>
-
-                                                    <img src="{{ asset('student/images/topics/undraw_Podcast_audience_re_4i5q.png')}}" class="custom-block-image img-fluid" alt="">
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="tab-pane fade" id="education-tab-pane" role="tabpanel" aria-labelledby="education-tab" tabindex="0">
-                                    <div class="row">
-                                        <div class="col-lg-6 col-md-6 col-12 mb-4 mb-lg-3">
-                                            <div class="custom-block bg-white shadow-lg">
-                                                <a href="topics-detail.html">
-                                                    <div class="d-flex">
-                                                        <div>
-                                                            <h5 class="mb-2">Graduation</h5>
-
-                                                            <p class="mb-0">Lorem Ipsum dolor sit amet consectetur</p>
-                                                        </div>
-
-                                                        <span class="badge bg-education rounded-pill ms-auto">80</span>
-                                                    </div>
-
-                                                    <img src="{{ asset('student/images/topics/undraw_Graduation_re_gthn.png')}}" class="custom-block-image img-fluid" alt="">
-                                                </a>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-6 col-md-6 col-12">
-                                            <div class="custom-block bg-white shadow-lg">
-                                                <a href="topics-detail.html">
-                                                    <div class="d-flex">
-                                                        <div>
-                                                            <h5 class="mb-2">Educator</h5>
-
-                                                            <p class="mb-0">Lorem Ipsum dolor sit amet consectetur</p>
-                                                        </div>
-
-                                                        <span class="badge bg-education rounded-pill ms-auto">75</span>
-                                                    </div>
-
-                                                    <img src="{{ asset('student/images/topics/undraw_Educator_re_ju47.png')}}" class="custom-block-image img-fluid" alt="">
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
+            </div>
+        </section>
+        
+        <!-- University Recommended Courses Section -->
+        <section class="explore-section section-padding" id="section_2">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <h2 class="mb-4">University Recommended Courses</h2>
                     </div>
                 </div>
-            </section>
-
+            </div>
+        
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <!-- Make this div scrollable -->
+                        <div class="tab-scroll-container">
+                            <ul class="nav nav-tabs" id="myTabUniversity" role="tablist">
+                                @foreach($courseCategories as $category)
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link {{ $loop->first ? 'active' : '' }}" 
+                                                id="university-{{ strtolower($category->name) }}-tab" 
+                                                data-bs-toggle="tab" 
+                                                data-bs-target="#university-{{ strtolower($category->name) }}-tab-pane" 
+                                                type="button" 
+                                                role="tab" 
+                                                aria-controls="university-{{ strtolower($category->name) }}-tab-pane" 
+                                                aria-selected="{{ $loop->first ? 'true' : 'false' }}">
+                                            {{ $category->name }}
+                                        </button>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <!-- Tab Content: Courses for Each Category -->
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="tab-content" id="myTabUniversityContent">
+                            @foreach($courseCategories as $category)
+                                <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" 
+                                     id="university-{{ strtolower($category->name) }}-tab-pane" 
+                                     role="tabpanel" 
+                                     aria-labelledby="university-{{ strtolower($category->name) }}-tab">
+        
+                                    <div class="position-relative">
+                                        <!-- Left Scroll Button -->
+                                        <button class="scroll-btn left-btn position-absolute start-0 top-50 translate-middle-y"
+                                                onclick="scrollLeft('university-{{ strtolower($category->name) }}')">
+                                            &#10094;
+                                        </button>
+        
+                                        <div class="row flex-nowrap overflow-auto custom-scroll-container px-5" 
+                                             id="scroll-container-university-{{ strtolower($category->name) }}">
+                                            @forelse($category->courses as $course)
+                                                <div class="col-lg-4 col-md-6 col-12 mb-4">
+                                                    <div class="custom-block bg-white shadow-lg">
+                                                        <div class="d-flex">
+                                                            <div>
+                                                                <h5 class="mb-2">{{ $course->name }}</h5>
+                                                            </div>
+                                                            <span class="badge bg-design rounded-pill ms-auto">{{ $loop->index + 1 }}</span>
+                                                        </div>
+                                                        <img src="{{ $course->image ?? asset('student/images/topics/default.png') }}" 
+                                                             class="custom-block-image img-fluid" 
+                                                             alt="{{ $course->name }}">
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <p class="text-center">No courses available in this category.</p>
+                                            @endforelse
+                                        </div>
+        
+                                        <!-- Right Scroll Button -->
+                                        <button class="scroll-btn right-btn position-absolute end-0 top-50 translate-middle-y" 
+                                                onclick="scrollRight('university-{{ strtolower($category->name) }}')">
+                                            &#10095;
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
             <section class="timeline-section section-padding" id="section_3">
                 <div class="section-overlay"></div>
@@ -743,5 +623,21 @@
         <script src="{{ asset('student/js/click-scroll.js')}}"></script>
         <script src="{{ asset('student/js/custom.js')}}"></script>
 
+        <script>
+            function scrollLeft(category) {
+    let container = document.getElementById(`scroll-container-${category}`);
+    if (container) {
+        container.scrollLeft -= 300; // Moves left by 300px
+    }
+}
+
+function scrollRight(category) {
+    let container = document.getElementById(`scroll-container-${category}`);
+    if (container) {
+        container.scrollLeft += 300; // Moves right by 300px
+    }
+}
+
+        </script>
     </body>
 </html>

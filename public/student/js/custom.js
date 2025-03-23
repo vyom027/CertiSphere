@@ -51,3 +51,14 @@
   })(window.jQuery);
 
 
+  function LeftScroll() {
+    var container = document.getElementById("scroll-container");
+    container.scrollBy({ left: -300, behavior: "smooth" });
+    console.log("Scrolled Left"); // Debugging log
+}
+
+function scrollRight() {
+    var container = document.getElementById("scroll-container");
+    container.scrollBy({ left: 300, behavior: "smooth" });
+    console.log("Scrolled Right"); // Debugging log
+}

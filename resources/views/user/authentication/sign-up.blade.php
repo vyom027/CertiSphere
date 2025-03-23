@@ -9,9 +9,16 @@
 
    <!--=============== CSS ===============-->
    <link rel="stylesheet" href="{{asset('student/css/sign-up.css')}}">
+   <link rel="stylesheet" href="{{asset('student/css/bootstrap.min.css')}}">
+   <link rel="stylesheet" href="{{asset('student/css/bootstrap-icons.css')}}">
+   <link rel="stylesheet" href="{{asset('student/css/templatemo-topic-listing.css')}}">
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   
    <title>Student Registration | LJKU</title>
 </head>
 <body>
+
+    @include('user.components.navbar')
    <!--=============== LOGIN IMAGE ===============-->
    <svg class="login__blob" viewBox="0 0 566 840" xmlns="http://www.w3.org/2000/svg">
       <mask id="mask0" mask-type="alpha">

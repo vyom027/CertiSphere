@@ -20,7 +20,7 @@ class AuthController extends Controller
         // echo $validated;
         // die;
 
-        return view('admin.login');
+        return view('user.authentication.login');
     }
 
     public function showLoginFormStudent(){
@@ -99,7 +99,7 @@ class AuthController extends Controller
             Session::forget('admin_logged_in');
             Session::forget('admin_name');
         }
-        return redirect()->route('login')->with('welcome_admin', 'Welcome, Admin!');
+        return redirect()->route('login-student')->with('welcome_admin', 'Welcome, Admin!');
     }
     public function logoutStudent()
     {
@@ -108,6 +108,6 @@ class AuthController extends Controller
             Session::forget('student_logged_in');
             Session::forget('student_name');
         }
-        return redirect()->route('login-student')->with('welcome_admin', 'Welcome, Admin!');
+        return redirect()->route('student.index')->with('welcome_student', 'Welcome, User!');
     }
 }

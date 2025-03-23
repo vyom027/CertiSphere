@@ -272,6 +272,63 @@ strong {
   color: var(--secondary-color);
 }
 
+.custom-scroll-container {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #aaa transparent;
+  scroll-behavior: smooth;
+}
+
+/* Ensure buttons are positioned correctly */
+.scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 10%;
+  transition: background 0.3s;
+}
+
+.scroll-btn:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.left-btn {
+  left: 10px; /* Ensure it’s visible */
+}
+
+.right-btn {
+  right: 10px;
+}
+
+/* Webkit scrollbar */
+.custom-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.custom-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scroll-container::-webkit-scrollbar-thumb {
+  background: #aaa;
+  border-radius: 20px;
+}
+
+.custom-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+
 
 /*---------------------------------------
   NAVIGATION              

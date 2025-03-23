@@ -11,6 +11,20 @@
       <!--=============== CSS ===============-->
       <link rel="stylesheet" href="{{asset('student/css/sign-up.css')}}">
       
+          <!-- CSS FILES -->        
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+        
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+          <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans&display=swap" rel="stylesheet">
+                          
+          <link href="{{ asset('student/css/bootstrap.min.css')}}" rel="stylesheet">
+  
+          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+          <link href="{{ asset('student/css/bootstrap-icons.css')}}" rel="stylesheet">
+          <link href="{{ asset('student/css/templatemo-topic-listing.css')}}" rel="stylesheet">      
+  
       <title>Log in | LJKU</title>
    </head>
    <body>
@@ -41,6 +55,8 @@
     });
 </script>
 @endif
+
+@include('user.components.navbar')
 
       <!--=============== LOGIN IMAGE ===============-->
       <svg class="login__blob" viewBox="0 0 566 840" xmlns="http://www.w3.org/2000/svg">

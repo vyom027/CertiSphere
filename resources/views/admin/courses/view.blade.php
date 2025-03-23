@@ -94,6 +94,7 @@
                             </div>
                             <div class="col-md-6">
                                 <h5>{{ $course->name }}</h5>
+                                <p class="text-muted">Category: {{ $course->courseCategory->name }}</p>
                                 <p class="text-muted">{{ $course->description }}</p>
                                 <a href="{{ $course->link }}" class="btn btn-primary" target="_blank">View Course</a>
                             </div>

@@ -96,6 +96,7 @@
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-3">Name</th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-3">Image</th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-3">Link</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-3">Category</th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-3">Description</th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-3">Actions</th>
                                         </tr>
@@ -115,6 +116,9 @@
                                             </td>
                                             <td class="align-middle">
                                                 <a href="{{ $course->link }}" target="_blank" class="text-info">View</a>
+                                            </td>
+                                            <td class="align-middle">
+                                                <span class="text-secondary text-xs font-weight-bold">{{ $course->courseCategory->name }}</span>
                                             </td>
                                             <td class="align-middle">
                                                 <p class="text-xs font-weight-bold mb-0">{{ Str::limit($course->description, 50) }}</p>

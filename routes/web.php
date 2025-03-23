@@ -1,10 +1,11 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\admin\BatchController;
-use App\Http\Controllers\admin\DepartmentController;
-use App\Http\Controllers\admin\StudentController;
-use App\Http\Controllers\admin\CourseController;
+use App\Http\Controllers\Admin\BatchController;
+use App\Http\Controllers\Admin\CourseCategoryController;
+use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\student\StudentController as StudentStudentController;
 use App\Http\Controllers\student\StudentPageController;
 use Illuminate\Support\Facades\Route;
@@ -15,15 +16,12 @@ use Illuminate\Support\Facades\Route;
 
 // Login Route
 
-Route::get('/', function () {
-    return view('user.index');
-});
 
 // Authentication Routes
 Route::get('/student/login', [AuthController::class, 'showLoginFormStudent'])->name('login-student');
 Route::post('/student/login', [AuthController::class, 'login']);
 Route::get('/student/logout', [AuthController::class, 'logoutStudent'])->name('Studentlogout');;
-Route::get('/index', [StudentPageController::class, 'index'])->name('student.index');
+Route::get('/', [StudentStudentController::class, 'indexHome'])->name('student.index');
 
 Route::prefix('admin')->group(function () {
     // Admin Dashboard (middleware 'auth' ensures only logged-in users can access this)
@@ -34,7 +32,7 @@ Route::prefix('admin')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     
     // Logout Route
-    Route::get('/logout', [AuthController::class, 'logoutAdmin'])->name('logout');
+    Route::post('/logout', [AuthController::class, 'logoutAdmin'])->name('logout');
 });
 // Admin Routes with Authentication Middleware
 Route::prefix('admin')->middleware(['auth'])->group(function () {
@@ -69,9 +67,28 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::delete('/student/{id}', 'destroy')->name('students.destroy');
     });
 
+    // Course Routes
+    Route::controller(CourseController::class)->group(function () {
+        Route::get('/course', 'index')->name('admin.courses.index');
+        Route::get('/course/create', 'create')->name('admin.courses.create');
+        Route::post('/course', 'store')->name('admin.courses.store');
+        Route::get('/course/{id}/edit', 'edit')->name('admin.courses.edit');
+        Route::put('/course/{id}', 'update')->name('admin.courses.update');
+        Route::delete('/course/{id}', 'destroy')->name('admin.courses.destroy');
+        Route::get('/course/{id}', 'show')->name('admin.courses.show');
+    });
+
+    Route::controller(CourseCategoryController::class)->group(function(){
+        Route::get('/course_categories' ,'index')->name('admin.course_categories.index');
+        Route::get('/course_categories/create', 'create')->name('admin.course_categories.create');
+        Route::post('/course_categories',  'store')->name('admin.course_categories.store');
+        Route::delete('/course_categories/{id}',  'destroy')->name('admin.course_categories.destroy');
+        Route::get('/course_categories/{id}/edit', 'edit')->name('admin.course_categories.edit');
+        Route::put('/course_categories/{id}', 'update')->name('admin.course_categories.update');
+    });
+
 
 });
-
 Route::prefix('student')->group(function (){
     Route::controller(StudentStudentController::class)->group(function(){
         Route::get('/signup', 'index')->name('student.signup');
@@ -79,9 +96,8 @@ Route::prefix('student')->group(function (){
     });
 });
 
-Route::prefix('student')->middleware(['auth'])->group(function () {
+Route::prefix('student')->group(function () {
     Route::controller(StudentPageController::class)->group(function () {
-        Route::get('/index', 'index')->name('student.index');
         Route::get('/edit/{enrollment_no}',  'edit')->name('student.edit');
         Route::put('/update/{enrollment_no}', 'update')->name('student.update');
         Route::get('/profile','showProfile')->name('student.profile');

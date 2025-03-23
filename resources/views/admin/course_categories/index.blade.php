@@ -48,9 +48,9 @@
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
               <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Pages</a></li>
-              <li class="breadcrumb-item text-sm text-white active" aria-current="page">Student</li>
+              <li class="breadcrumb-item text-sm text-white active" aria-current="page">Courses</li>
             </ol>
-            <h6 class="font-weight-bolder text-white mb-0">Student List</h6>
+            <h6 class="font-weight-bolder text-white mb-0">Courses List</h6>
           </nav>
           <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
             <div class="ms-md-auto pe-md-3 d-flex align-items-center">
@@ -80,52 +80,63 @@
       </nav>
 
       <div class="container-fluid py-4">
-        <div class="row">
-            <div class="col-md-8 mx-auto">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h6>Edit Course</h6>
-                        <a href="{{ route('admin.courses.index') }}" class="btn btn-secondary btn-sm">Back</a>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ route('admin.courses.update', $course->id) }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            @method('PUT')
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Course Name</label>
-                                <input type="text" class="form-control" id="name" name="name" value="{{ $course->name }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="image" class="form-label">Course Image</label>
-                                <img src="{{ asset($course->image) }}" alt="Current course image" class="img-fluid mb-2" style="max-width: 200px;">
-                                <input type="file" class="form-control" id="image" name="image" accept="image/*">
-                            </div>
-                            <div class="mb-3">
-                                <label for="link" class="form-label">Course Link</label>
-                                <input type="url" class="form-control" id="link" name="link" value="{{ $course->link }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="course_category_id" class="form-label">Course Category</label>
-                                <select class="form-select" id="course_category_id" name="course_category_id" required>
-                                    <option value="" disabled>Select a category</option>
-                                    @foreach($courseCategories as $category)
-                                        <option value="{{ $category->id }}" {{ $course->course_category_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea class="form-control" id="description" name="description" rows="3" required>{{ $course->description }}</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Update Course</button>
-                        </form>
+          <div class="row">
+              <div class="col-12">
+                  <div class="card py-5 pb-0">
+                      <div class="card-header d-flex justify-content-between align-items-center pb-0">
+                          <h6>Course Categories</h6>
+                          <a href="{{ route('admin.course_categories.create') }}" class="btn btn-primary btn-sm">Add Category</a>
+                      </div>
+                      <div class="card-body px-0 pt-0 pb-0">
+                          <div class="table-responsive p-0">
+                              <table class="table align-items-center">
+                                  <thead>
+                                      <tr>
+                                          <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-3">Index</th>
+                                          <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-3">Category Name</th>
+                                          <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-3">Api Link</th>
+                                          <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-3">Actions</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
+                                      @foreach($courseCategories as $category)
+                                      <tr>
+                                          <td class="align-middle ps-3">
+                                              {{ $loop->iteration }}
+                                          </td>
 
-                            
-                    </div>
-                </div>
-            </div>
-        </div>
-      
+                                          <td class="align-middle ps-3">
+                                              <span class="text-secondary text-xs font-weight-bold">{{ $category->name }}</span>
+                                          </td>
+
+                                          <td class="align-middle ps-3">
+                                              <span class="text-secondary text-xs font-weight-bold">{{ $category->link }}</span>
+                                          </td>
+
+                                          <td class="align-middle">
+                                              <a href="{{ route('admin.course_categories.edit', $category->id) }}" class="text-success mx-2" title="Edit">
+                                                  <i class="fas fa-edit"></i>
+                                              </a>
+                                              <form action="{{ route('admin.course_categories.destroy', $category->id) }}" method="POST" style="display:inline;">
+                                                  @csrf
+                                                  @method('DELETE')
+                                                  <button type="submit" style="border: none; background: none;" class="text-danger mx-2" title="Delete">
+                                                      <i class="fas fa-trash"></i>
+                                                  </button>
+                                              </form>
+                                          </td>
+                                      </tr>
+                                      @endforeach
+                                  </tbody>
+                              </table>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+
     </main>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

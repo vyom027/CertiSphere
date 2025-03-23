@@ -7,12 +7,14 @@ use App\Models\Department;
 use App\Models\Student;
 use App\Models\User;
 use App\Http\Controllers\Controller;
+use App\Models\Course;
+use App\Models\CourseCategory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Http;
 class StudentController extends Controller
 {
     /**
@@ -24,6 +26,27 @@ class StudentController extends Controller
         $departments = Department::all();
         return view('user.authentication.sign-up',compact('batches','departments'));
     }
+
+    public function indexHome()
+    {
+        $courseCategories = CourseCategory::all();
+        // dd($courseCategories);
+        foreach ($courseCategories as $category) {
+            $response = Http::get($category->link); 
+    
+            if ($response->successful()) {
+                $courses = collect($response->json()); 
+                $category->topCourses = $courses->take(5);
+            } else {
+                $category->topCourses = collect(); 
+            }
+        }
+        // dd($category->topCourses);
+        $unCourses = Course::with('courseCategory')->get();
+
+        return view('user.index',compact('courseCategories','unCourses'))->with('welcome_student', 'Welcome, Student!');
+    }
+
 
     /**
      * Show the form for creating a new resource.
