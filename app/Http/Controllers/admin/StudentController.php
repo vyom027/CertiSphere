@@ -8,7 +8,9 @@ use App\Models\Department;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
-
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use League\Csv\Reader;
+use League\Csv\Statement;
 class StudentController extends Controller
 {
     /**
@@ -161,5 +163,132 @@ class StudentController extends Controller
             return redirect()->route('students.index')->with('success', 'Student details updated successfully!');
             
         }
+    }
+    public function export()
+        {
+            // Prepare the column headers for the CSV (adjust these headers as per your model fields)
+            $headers = [
+                'Index', 
+                'First Name', 
+                'Last Name', 
+                'Enrollment No.', 
+                'Division',
+                'Email',
+                'Department',
+                'Batch',
+                'Batch Start Year', 
+                'Batch End Year',
+                'Mobile No.',
+                'Profile Picture',
+            ];
+
+            // Create a streamed response
+            $response = new StreamedResponse(function () use ($headers) {
+                // Open PHP output stream
+                $output = fopen('php://output', 'w');
+                
+                // Write the headers to the CSV
+                fputcsv($output, $headers);
+
+                // Write student data to the CSV
+                $students = Student::with('department', 'batch')->get(); // Fetch all students with their related data
+
+                $i = 1; // Index counter
+                foreach ($students as $student) {
+                    $enrollment_no = '"' . (string) $student->enrollment_no . '"';
+                    $row = [
+                        $i,
+                        $student->first_name,
+                        $student->last_name,
+                        $enrollment_no,
+                        $student->division,
+                        $student->email,
+                        $student->department->name, 
+                        $student->batch_id, 
+                        $student->batch->start_year,
+                        $student->batch->end_year,  
+                        $student->phone_number,
+                        $student->profile_picture,
+                    ];
+
+                    fputcsv($output, $row);
+                    $i++;
+                }
+                fclose($output);
+            });
+            // Set the headers for the CSV file download
+            $response->headers->set('Content-Type', 'text/csv');
+            $response->headers->set('Content-Disposition', 'attachment; filename="students.csv"');
+
+            // Return the response to prompt the download
+            return $response;
+        }
+
+        public function upload(Request $request)
+        {
+            // Validate the file
+            $request->validate([
+                'csv_file' => 'required|mimes:csv,txt|max:10240', // max file size 10MB
+            ]);
+
+            if ($request->hasFile('csv_file')) {
+                $file = $request->file('csv_file');
+                
+                $filePath = public_path('csv/' . $file->getClientOriginalName()); // Save the file in public/csv/
+                
+                $file->move(public_path('csv'), $file->getClientOriginalName());
+
+                $this->importStudentsFromCsv($filePath);
+
+                return redirect()->back()->with('success', 'Students have been uploaded successfully.');
+            }
+
+
+            return redirect()->back()->with('error', 'No file selected.');
+        }
+
+    // Method to import students from CSV file
+    private function importStudentsFromCsv($filePath)
+    {
+        // Use the League\Csv library to parse the CSV file
+        $csv = Reader::createFromPath($filePath, 'r');
+        $csv->setHeaderOffset(0); // Set the first row as header
+
+        // Get all rows from the CSV
+        $records = (new Statement())->process($csv);
+
+        foreach ($records as $row) {
+            // Assuming your CSV columns match these
+            $enrollment_no = str_replace('"', '', $row['Enrollment No.']);
+            $enrollment_no = (int) $enrollment_no;
+            // echo($enrollment_no);
+            $existingStudent = Student::where('enrollment_no', $enrollment_no)->first();
+            // If student already exists, skip to the next record
+            if ($existingStudent) {
+                continue; // Skip to the next record
+            }
+            $student = new Student();
+            $student->first_name = $row['First Name'];
+            $student->last_name = $row['Last Name'];
+            $student->email = $row['Email'];
+            $student->enrollment_no = $enrollment_no;
+            $dept = $this->getDepartmentIdByName($row['Department']);
+            $student->dept_id = $dept->dept_id;
+            $student->phone_number = $row['Mobile No.'];
+            $student->batch_id = $row['Batch'];
+            $student->division = $row['Division'];
+            $student->profile_picture = $row['Profile Picture'];
+            // Save student
+            $student->save();
+        }
+    }
+
+    // Helper method to get department ID by name
+    private function getDepartmentIdByName($departmentName)
+    {
+        $departmentName = trim($departmentName);
+        $department = Department::where('name', $departmentName)->first();
+    
+        return $department; // If department not found, return null
     }
 }

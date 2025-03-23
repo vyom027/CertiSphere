@@ -82,13 +82,31 @@
         <div class="row">
           <div class="col-12">
             <div class="card py-5 pb-0" >
-              <div class="card-header d-flex justify-content-between align-items-center pb-0">
-                <h6>Student List</h6>
+              <div class="card-header pb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6>Student List</h6>
+                    <div class="d-flex gap-2">
+                        <!-- Download CSV Button -->
+                        
+                        <!-- Upload CSV Form -->
+                        <form action="{{ route('students.upload') }}" method="POST" enctype="multipart/form-data" class="d-flex align-items-center">
+                            @csrf
+                            <div class="input-group">
+                              <input type="file" style="width: 200px; border: none; " name="csv_file" class="form-control" id="csv_file" accept=".csv" required>
+                              <button type="submit" class="btn btn-success btn-sm">Upload</button>
+                            </div>
+                          </form>
+                          
+                          <a href="{{ route('students.export') }}" class="btn btn-secondary btn-sm">Download CSV</a>
+                        <!-- Add Student Button -->
+                        <a href="{{ route('students.create') }}" class="btn btn-primary btn-sm">Add Student</a>
+                    </div>
+                </div>
+            </div>
 
-                <a href="{{ route('students.create') }}" class="btn btn-primary btn-sm">Add Student</a>
-              </div>
-              <div class="card-body px-0 pt-0 pb-0">
+            <div class="card-body px-0 pt-0 pb-0">
                 <div class="table-responsive p-0">
+                    
                     <table class="table align-items-center"  >
                         <thead>
                           <tr>

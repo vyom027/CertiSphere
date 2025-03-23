@@ -65,6 +65,8 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('/student/{id}/edit', 'edit')->name('students.edit');
         Route::put('/student/{id}', 'update')->name('students.update'); 
         Route::delete('/student/{id}', 'destroy')->name('students.destroy');
+        Route::get('/students/export', 'export')->name('students.export');
+        Route::post('/students/upload', 'upload')->name('students.upload');
     });
 
     // Course Routes
