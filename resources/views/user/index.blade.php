@@ -231,8 +231,9 @@
                                         <!-- Scrollable Container -->
                                         <div class="row flex-nowrap overflow-auto custom-scroll-container px-5" id="scroll-container-browse-{{ strtolower($category->name) }}">
                                             @forelse($category->topCourses['elements'] as $course)
-                                                <div class="col-lg-4 col-md-6 col-12 mb-4">
-                                                    <div class="custom-block bg-white shadow-lg">
+                                            <div class="col-lg-4 col-md-6 col-12 mb-4">
+                                                <div class="custom-block bg-white shadow-lg">
+                                                        <a href="https://www.coursera.org/learn/{{ $course['slug'] }}" target="_blank" class="text-decoration-none">
                                                         <div class="d-flex">
                                                             <div>
                                                                 <h5 class="mb-2">{{ $course['name'] ?? 'Default Name' }}</h5>
@@ -242,6 +243,7 @@
                                                         <img src="{{ $course['image'] ?? asset('student/images/topics/default.png') }}" 
                                                              class="custom-block-image img-fluid" 
                                                              alt="{{ $course['name'] }}">
+                                                            </a>
                                                     </div>
                                                 </div>
                                             @empty
