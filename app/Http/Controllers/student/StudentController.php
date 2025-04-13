@@ -7,14 +7,17 @@ use App\Models\Department;
 use App\Models\Student;
 use App\Models\User;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Course;
 use App\Models\CourseCategory;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SendOtpMail;
+use App\Models\CollegeSelectedCourse;
+use Illuminate\Support\Facades\Validator;
+
 class StudentController extends Controller
 {
     /**
@@ -29,24 +32,47 @@ class StudentController extends Controller
 
     public function indexHome()
     {
-        $courseCategories = CourseCategory::all();
-        // dd($courseCategories);
-        foreach ($courseCategories as $category) {
-            $response = Http::get($category->link); 
-    
-            if ($response->successful()) {
-                $courses = collect($response->json()); 
-                $category->topCourses = $courses->take(5);
-            } else {
-                $category->topCourses = collect(); 
-            }
+        if(session('student_logged_in')){
+            $semester = session('semesters'); // Get semester from session
+            // dd($semester);
+            $student = Student::where('enrollment_no', session('student_enrollment'))->first();
+
+            $departmentName = Department::where('dept_id', $student->dept_id)->value('name');
+
+            $clgCourses = CollegeSelectedCourse::where('semester', $semester)
+            ->where('department', $departmentName)
+            ->get();
         }
-        // dd($category->topCourses);
+        $courseCategories = CourseCategory::all();
+        
+        foreach ($courseCategories as $category) {
+            // First, check if data exists in cache
+            $cachedResponse = Cache::get("category_{$category->id}");
+    
+            if (!$cachedResponse) {
+                // If not cached, make API request
+                $httpResponse = Http::get($category->link);
+                
+                if ($httpResponse->successful()) {
+                    $cachedResponse = $httpResponse->json();
+                    Cache::put("category_{$category->id}", $cachedResponse, 50000);
+                } else {
+                    $cachedResponse = []; // Set empty array on failure
+                }
+            }
+    
+            // Process courses
+            $courses = collect($cachedResponse);
+            $category->topCourses = $courses->take(5);
+        }
+    
         $unCourses = Course::with('courseCategory')->get();
-
-        return view('user.index',compact('courseCategories','unCourses'))->with('welcome_student', 'Welcome, Student!');
+        if(session('student_logged_in'))
+            return view('user.index', compact('courseCategories', 'unCourses','clgCourses'))->with('welcome_student', 'Welcome, Student!');
+        else
+            return view('user.index', compact('courseCategories', 'unCourses'))->with('welcome_student', 'Welcome, Student!');
     }
-
+    
 
     /**
      * Show the form for creating a new resource.
@@ -61,20 +87,33 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-
-            $validated = $request->validate([
-                'enrollment_no' => 'required|numeric|unique:students',
-                'first_name' => 'required|string|max:255',
-                'last_name' => 'required|string|max:255',
-                'email' => 'required|email|unique:students',
-                'phone_number' => 'required|numeric|unique:students',
-                'batch_id' => 'required|exists:batch,batch_id',
-                'dept_id' => 'required|exists:department,dept_id',
-                'profile_picture' => 'nullable|image|max:10240',
-                'password' => 'required|min:8|max:20| regex:/[a-z]/| regex:/[A-Z]/| regex:/[0-9]/| regex:/[@$!%*#?&_]/',
-                'division' => 'required',
-            ]);
-
+        
+        $validated = $request->validate([
+            'enrollment_no' => 'required|numeric|unique:students',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:students',
+            'phone_number' => 'required|numeric|unique:students|digits:10',
+            'batch_id' => 'required|exists:batch,batch_id',
+            'dept_id' => 'required|exists:department,dept_id',
+            'profile_picture' => 'nullable|image|max:10240',
+            'password' => 'required|min:8|max:20|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|regex:/[@$!%*#?&_]/',
+            'division' => 'required',
+        ], [
+            'enrollment_no.numeric' => 'The enrollment number must be a number.',
+            'enrollment_no.unique' => 'The enrollment number has already been taken.',
+            'first_name.string' => 'The first name must be a string.',
+            'last_name.string' => 'The last name must be a string.',
+            'email.unique' => 'The email has already been taken.',
+            'phone_number.numeric' => 'The phone number must be a number.',
+            'phone_number.digits' => 'The phone number must be exactly 10 digits.',
+            'phone_number.unique' => 'The phone number has already been taken.',
+            'profile_picture.max' => 'The profile picture may not be greater than 10MB.',
+            'password.min' => 'The password must be at least 8 characters.',
+            'password.max' => 'The password may not be greater than 20 characters.',
+            'password.regex' => 'The password must include at least one lowercase letter, one uppercase letter, one number, and one special character.',
+        ]);
+        
         
         // echo "test";
         // die;
@@ -83,15 +122,15 @@ class StudentController extends Controller
             $file = $request->file('profile_picture');
             $fileName = time() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('profile_pictures'), $fileName);
-        
+            
             $validated['profile_picture'] = 'profile_pictures/' . $fileName;
         }
         
         
-
+        
         // Hash password
         $validated['password'] = bcrypt($validated['password']);
-
+        
         // Save the student
         $student = new Student();
         $student->enrollment_no = $validated['enrollment_no'];
@@ -108,6 +147,7 @@ class StudentController extends Controller
         else{
             $student->profile_picture = 'profile_pictures/default.png';
         }
+        $student->verified = 'verified';
         $student->save();
         $user = new User();
         $user->email = $validated['email'];
@@ -116,6 +156,7 @@ class StudentController extends Controller
         $user->save();
         
         return view("user.authentication.login")->with('success', 'Student registered successfully!');
+        // dd('call');
     }
 
     /**
@@ -151,4 +192,106 @@ class StudentController extends Controller
     {
         //
     }
+
+    public function send(Request $request)
+    {
+
+        $data = $request->json()->all();
+
+        $validator = Validator::make($data, [
+            'enrollment_no' => 'required|numeric|unique:students',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:students',
+            'phone_number' => 'required|numeric|unique:students|digits:10',
+            'batch_id' => 'required|exists:batch,batch_id',
+            'dept_id' => 'required|exists:department,dept_id',
+            'profile_picture' => 'nullable|image|max:10240',
+            'password' => 'required|min:8|max:20|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|regex:/[@$!%*#?&_]/',
+            'division' => 'required',
+        ], [
+            'enrollment_no.numeric' => 'The enrollment number must be a number.',
+            'enrollment_no.unique' => 'The enrollment number has already been taken.',
+            'first_name.string' => 'The first name must be a string.',
+            'last_name.string' => 'The last name must be a string.',
+            'email.unique' => 'The email has already been taken.',
+            'phone_number.numeric' => 'The phone number must be a number.',
+            'phone_number.digits' => 'The phone number must be exactly 10 digits.',
+            'phone_number.unique' => 'The phone number has already been taken.',
+            'profile_picture.max' => 'The profile picture may not be greater than 10MB.',
+            'password.min' => 'The password must be at least 8 characters.',
+            'password.max' => 'The password may not be greater than 20 characters.',
+            'password.regex' => 'The password must include at least one lowercase letter, one uppercase letter, one number, and one special character.',
+        ]);
+
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $otp = rand(100000, 999999);
+        Session::put('otp_' . $request->email, $otp);
+    
+        // Send Email
+        Mail::to($request->email)->send(new SendOtpMail($otp));
+        // Send SMS        
+        return response()->json([
+            'status' => 'success',
+            'message' => 'OTP sent successfully',
+            'otp' => $otp // optional: include it for testing/demo
+        ]);
+
+    }
+
+    public function verify(Request $request)
+    {
+        $sessionOtp = Session::get('otp_' . $request->email);
+
+        if ($sessionOtp == $request->otp) {
+            Session::forget('otp_' . $request->email); // one-time use
+            return response()->json(['status' => 'verified']);
+        }
+
+        return response()->json(['status' => 'failed']);
+    }
+   
+
+    public function searchCourses(Request $request)
+    {
+        $query = $request->input('keyword');
+
+        if (!$query) {
+            return view('user.search-results', ['courses' => [], 'query' => '']);
+        }
+
+        // Check cache for this keyword, store results for 1 hour
+        $cacheKey = 'courses_search_' . strtolower($query);
+        $courses = Cache::remember($cacheKey, now()->addHour(), function () use ($query) {
+            $response = Http::get('https://api.coursera.org/api/courses.v1', [
+                'q' => 'search',
+                'query' => $query,
+                'limit' => 10
+            ]);
+
+            $results = [];
+
+            if ($response->successful()) {
+                $data = $response->json();
+
+                foreach ($data['elements'] as $course) {
+                    $results[] = [
+                        'id' => $course['id'],
+                        'name' => $course['name'],
+                        'slug' => $course['slug'],
+                        'link' => 'https://www.coursera.org/learn/' . $course['slug'],
+                    ];
+                }
+            }
+
+            return $results;
+        });
+
+        return view('user.search-results', compact('courses', 'query'));
+    }
+
+    
 }

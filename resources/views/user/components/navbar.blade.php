@@ -6,7 +6,7 @@
     <div class="container">
         <a class="navbar-brand" href="{{route('student.index')}}">
             <i class="bi-back"></i>
-            <span>Topic</span>
+            <span>Certisphere</span>
         </a>
         
             <div class="d-lg-none ms-auto me-4">
@@ -24,11 +24,11 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link click-scroll" href="#section_2">Browse Topics</a>
+                    <a class="nav-link click-scroll" href="{{route('student.index')}}#section_2">Browse Courses</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link click-scroll" href="#section_3">Certificate</a>
+                    <a class="nav-link" href="{{ route('certificate-requests.index') }}">Certificate</a>
                 </li>
 
                 <li class="nav-item">

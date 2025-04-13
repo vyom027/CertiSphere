@@ -71,7 +71,7 @@
             <path d="M342.407 73.6315C388.53 56.4007 394.378 17.3643 391.538 
             0H566V840H0C14.5385 834.991 100.266 804.436 77.2046 707.263C49.6393 
             591.11 115.306 518.927 176.468 488.873C363.385 397.026 156.98 302.824 
-            167.945 179.32C173.46 117.209 284.755 95.1699 342.407 73.6315Z" fill="hsl(208, 92%, 54%)"/>
+            167.945 179.32C173.46 117.209 284.755 95.1699 342.407 73.6315Z" fill="#80d0c7"/>
       
             <!-- Insert your image (recommended size: 1000 x 1200) -->
             <image class="login__img" href="assets/img/bg-img.jpg"/>
@@ -111,7 +111,8 @@
 
                   </div>
          
-                  <a href="#" class="login__forgot">Forgot your password?</a>
+                  <a href="{{ route('password.request') }}" class="login__forgot">Forgot your password?</a>
+
          
                   <button type="submit" class="login__button">Login</button>
                </form>

@@ -6,6 +6,8 @@
 
    <!--=============== REMIXICONS ===============-->
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.css">
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
 
    <!--=============== CSS ===============-->
    <link rel="stylesheet" href="{{asset('student/css/sign-up.css')}}">
@@ -31,7 +33,7 @@
          <path d="M342.407 73.6315C388.53 56.4007 394.378 17.3643 391.538 
             0H566V840H0C14.5385 834.991 100.266 804.436 77.2046 707.263C49.6393 
             591.11 115.306 518.927 176.468 488.873C363.385 397.026 156.98 302.824 
-            167.945 179.32C173.46 117.209 284.755 95.1699 342.407 73.6315Z" fill='hsl(208, 92%, 54%)'/>
+            167.945 179.32C173.46 117.209 284.755 95.1699 342.407 73.6315Z" fill='#80d0c7'/>
    
       </g>
    </svg>      
@@ -41,7 +43,15 @@
       <!--===== LOGIN ACCESS =====-->
       <div class="login__access">
         <h1 class="login__title"> Student Registration</h1> 
-  
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
         <div class="login__area">
              <form action="{{ route('student.store') }}" enctype="multipart/form-data" class="login__form" method="post">
                 @csrf
@@ -141,16 +151,37 @@
        
                    <p class="login__switch_container">
                        <button type="button" id="prev3" class="login__switch_left">Previous</button>
-                       <button type="submit" id="submit" class="login__switch_right">Submit</button>
+                       <button type="button" id="submitOtpBtn" class="login__switch_right">Submit</button>
                    </p>
                 </div>
+                <!-- OTP Verification Modal -->
+                
+  
+
             </form>
+            <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content p-4">
+                    <h5 class="modal-title mb-3" id="otpModalLabel">Verify OTP</h5>
+                    <div class="form-group">
+                    <input type="text" class="form-control" id="otp_input" placeholder="Enter OTP">
+                    </div>
+                    <div class="text-end mt-3">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary" id="verifyOtpBtn">Verify</button>
+                    </div>
+                </div>
+                </div>
+            </div>
          </div>
       </div>
    </div>
    
    <!--=============== MAIN JS ===============-->
    <script src="{{asset('student/js/sign-up.js')}}"></script>
+   <!-- Bootstrap JS Bundle (includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
    <script>
     document.getElementById('next1').addEventListener('click', function() {
         // Validate if all fields in step-1 are filled
@@ -207,6 +238,87 @@
     
 
 </script>
+<script>
+document.getElementById('submitOtpBtn').addEventListener('click', function () {
+    const form = document.querySelector('.login__form');
+    const formData = new FormData(form);
 
+    // Convert FormData to plain object
+    const data = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+
+    Swal.fire({
+        title: 'Validating & Sending OTP...',
+        text: 'Please wait while we validate your data and send the OTP.',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch("{{ route('otp.send') }}", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+    },
+    body: JSON.stringify(data)
+    })
+    .then(async (res) => {
+        Swal.close();
+        if (res.ok) {
+            const data = await res.json();
+            if (data.status === "success") {
+                const otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
+                otpModal.show();
+                Swal.fire("Success", data.message, "success");
+            } else {
+                Swal.fire("Error", data.message || "Something went wrong.", "error");
+            }
+        } else if (res.status === 422) {
+            const errorData = await res.json();
+            let errorMessages = Object.values(errorData.errors).flat().join("<br>");
+            Swal.fire({
+                icon: "error",
+                title: "Validation Error",
+                html: errorMessages
+            });
+        } else {
+            Swal.fire("Error", "Something went wrong. Please try again.", "error");
+        }
+    })
+    .catch(() => {
+        Swal.close();
+        Swal.fire("Error", "Request failed. Please check your internet or try again.", "error");
+    });
+
+});
+
+document.getElementById('verifyOtpBtn').addEventListener('click', function () {
+    const otp = document.getElementById('otp_input').value;
+    const email = document.querySelector('[name="email"]').value;
+
+    fetch("{{ route('otp.verify') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({ email: email, otp: otp })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "verified") {
+            document.querySelector('.login__form').submit(); // submit only now
+        } else {
+            Swal.fire("Invalid OTP", "Please try again.", "error");
+        }
+    });
+});
+
+</script>
+    
 </body>
 </html>

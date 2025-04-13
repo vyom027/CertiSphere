@@ -13,50 +13,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 class StudentPageController extends Controller
 {
-    public function __construct()
-    {
-        if (!session()->has('student_logged_in')) {
-            redirect()->route('login-student')->send();
-        }
-    }
-    
-    
 
     public function showProfile()
     {
         $student = Student::where('email', Auth::user()->email)->first();
         $batches = Batch::where('batch_id', $student->batch_id)->first();
         $departments = Department::where('dept_id', $student->dept_id)->first();
-
-        $startYear = $batches->start_year;
-
-        // Get the current year
-        $currentYear = now()->year;
-
-        // Calculate the number of years passed
-        $yearsPassed = $currentYear - $startYear;
-
-        // Calculate the number of semesters (2 semesters per year)
-        $semesters = $yearsPassed * 2;
-
-        // If the current year is the same as the start year, check if a semester has passed
-        if ($yearsPassed === 0) {
-            $currentMonth = now()->month;
-
-            // If it's the second semester (Fall), count 1 semester
-            if ($currentMonth >= 7) {
-                $semesters = 1;
-            } else {
-                $semesters = 0;
-            }
-        } else {
-            // If the current year is past the start year, check if a semester has passed in the current year
-            $currentMonth = now()->month;
-            if ($currentMonth >= 7) {
-                // Add 1 semester for Fall semester
-                $semesters++;
-            }
-        }
+        $semesters = session('semesters');
         return view('user.profile', compact('student', 'batches', 'departments','semesters'));
     }
 

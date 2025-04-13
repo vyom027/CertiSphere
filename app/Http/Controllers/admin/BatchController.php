@@ -64,7 +64,7 @@ class BatchController extends Controller
     {
         $batch = Batch::findOrFail($id);
         $departments = Department::all();
-        return view('batch.edit', compact('batch', 'departments'));
+        return view('admin.batch.edit-batch', compact('batch', 'departments'));
     }
 
     /**

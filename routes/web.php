@@ -2,25 +2,35 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\BatchController;
+use App\Http\Controllers\Admin\CertificateRequestController;
 use App\Http\Controllers\Admin\CourseCategoryController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\student\StudentController as StudentStudentController;
 use App\Http\Controllers\student\StudentPageController;
+use App\Http\Controllers\Admin\CollegeSelectedCourseController;
+use App\Http\Controllers\student\CertificateSubmissionController;
+use App\Models\CertificateRequest;
 use Illuminate\Support\Facades\Route;
 
 
 // Route::get('/courses', [CourseController::class, 'index']);
 
 
-// Login Route
+// Forgot Password
+Route::get('/student/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('/student/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+
+// Reset Password
+Route::get('/student/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+Route::post('/student/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
 
 
 // Authentication Routes
-Route::get('/student/login', [AuthController::class, 'showLoginFormStudent'])->name('login-student');
-Route::post('/student/login', [AuthController::class, 'login']);
-Route::get('/student/logout', [AuthController::class, 'logoutStudent'])->name('Studentlogout');;
+Route::get('/login', [AuthController::class, 'showLoginFormStudent'])->name('login-student');
+Route::post('/login', [AuthController::class, 'login']);
 Route::get('/', [StudentStudentController::class, 'indexHome'])->name('student.index');
 
 Route::prefix('admin')->group(function () {
@@ -35,7 +45,7 @@ Route::prefix('admin')->group(function () {
     Route::post('/logout', [AuthController::class, 'logoutAdmin'])->name('logout');
 });
 // Admin Routes with Authentication Middleware
-Route::prefix('admin')->middleware(['auth'])->group(function () {
+Route::prefix('admin')->middleware(['auth', 'is_admin'])->group(function () {
 
     // Batch Routes
     Route::controller(BatchController::class)->group(function () {
@@ -89,19 +99,57 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::put('/course_categories/{id}', 'update')->name('admin.course_categories.update');
     });
 
+    Route::controller(CollegeSelectedCourseController::class)->group(function(){
+        Route::get('/college-courses', 'index')->name('admin.college-courses.index');
+        Route::get('/college-courses/create',  'create')->name('admin.college-courses.create');
+        
+        Route::get('/college-courses/{id}/edit', 'edit')->name('admin.college-courses.edit');
+        Route::put('/college-courses/{id}',  'update')->name('admin.college-courses.update');
+        Route::delete('/college-courses/{id}',  'destroy')->name('admin.college-courses.destroy');
+        Route::post('/college-courses', 'store')->name('admin.college-courses.store');
+   
+        Route::get('/search-coursera-form', 'showSearchForm')->name('admin.search-course-form');
+        Route::get('/search-coursera-courses', 'search')->name('admin.search-coursera-courses');
+        
+    });
+
+    Route::controller(CertificateRequestController::class)->group(function () {
+        Route::get('/certificate-requests', 'index')->name('admin.certificate-requests.index');
+        Route::get('/certificate-requests/create', 'create')->name('admin.certificate-requests.create');
+        Route::post('/certificate-requests', 'store')->name('admin.certificate-requests.store');
+        Route::post('/admin/certificate-requests/{id}/close', 'close')->name('admin.certificate-requests.close');
+        Route::post('/admin/certificate-requests/{id}/open', 'open')->name('admin.certificate-requests.open');
+        Route::get('/certificate-requests/{id}', 'show')->name('admin.certificate-requests.show');
+        Route::get('/certificate-requests/{id}/edit', 'edit')->name('admin.certificate-requests.edit');
+        Route::put('/certificate-requests/{id}', 'update')->name('admin.certificate-requests.update');
+        Route::delete('/certificate-requests/{id}', 'destroy')->name('admin.certificate-requests.destroy');
+    });
 
 });
 Route::prefix('student')->group(function (){
     Route::controller(StudentStudentController::class)->group(function(){
         Route::get('/signup', 'index')->name('student.signup');
         Route::post('/signup', 'store')->name('student.store');
+        Route::post('/send-otp', 'send')->name('otp.send');
+        Route::post('/verify-otp', 'verify')->name('otp.verify');
+        
+        Route::get('/search-course',  'searchCourses')->name('coursesNew.search');
     });
 });
 
-Route::prefix('student')->group(function () {
+Route::prefix('student')->middleware(['auth', 'is_student'])->group(function () {
     Route::controller(StudentPageController::class)->group(function () {
         Route::get('/edit/{enrollment_no}',  'edit')->name('student.edit');
         Route::put('/update/{enrollment_no}', 'update')->name('student.update');
         Route::get('/profile','showProfile')->name('student.profile');
+
+    });
+    Route::get('/student/logout', [AuthController::class, 'logoutStudent'])->name('Studentlogout');
+    Route::controller(CertificateSubmissionController::class)->group(function () {
+        Route::get('/certificate-requests', 'showAvailableRequests')->name('certificate-requests.index');
+        Route::post('/certificate/upload', 'upload')->name('student.certificate.upload');
+        Route::get('/my-certificates','index')->name('student.certificate-submissions.index');
+
     });
 });
+

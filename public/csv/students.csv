@@ -1,4 +1,6 @@
-Index,"First Name","Last Name","Enrollment No.",Email,Department,"Batch Start Year","Batch End Year","Mobile No."
-1,om,zadafiya,23004500210001,23004500210001@mail.ljku.edu.in,BCA,2023,2028,"+91 1122334455"
-2,Vivek,Prajapati,23004500210215,23004500210215@mail.ljku.edu.in,IMSCIT,2023,2028,"+91 8849721477"
-3,Krisha,Purohit,23004500210216,23004500210216@mail.ljku.edu.in,IMSCIT,2023,2028,"+91 8469407881"
+Index,First Name,Last Name,Enrollment No.,Division,Email,Department,Batch,Batch Start Year,Batch End Year,Mobile No.,Profile Picture
+1,om,zadafiya,"""23004500210001""",C,23004500210001@mail.ljku.edu.in,BCA,3,2023,2028,1122334455,profile_pictures/1741010255.png
+2,Vivek,Prajapati,"""23004500210215""",C,23004500210215@mail.ljku.edu.in,IMSCIT,1,2023,2028,8849721477,profile_pictures/1742651453.jpg
+3,Krisha,Purohit,"""23004500210216""",C,23004500210216@mail.ljku.edu.in,IMSCIT,1,2023,2028,8469407881,profile_pictures/default.png
+4,Test,Test,"""23004500210987""",B,23004500210987@mail.ljku.edu.in,MBA,5,2025,2028,3344556677,profile_pictures/1742838523.jpg
+5,Ankur,Day,"""23004500210988""",B,23004500210988@mail.ljku.edu.in,MBA,5,2025,2028,3344556679,profile_pictures/1742838523.jpg

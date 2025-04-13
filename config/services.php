@@ -39,4 +39,11 @@ return [
         'api_key' => env('COURSERA_API_KEY'),
     ],
 
+    'gmail' => [
+        'host' => 'smtp.gmail.com',
+        'port' => 587,
+        'username' => env('MAIL_USERNAME'),
+        'password' => env('MAIL_PASSWORD'),
+        'encryption' => 'tls',
+    ],
 ];
