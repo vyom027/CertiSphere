@@ -33,4 +33,9 @@ class Student extends Model
     {
         return $this->belongsTo(User::class, 'email', 'email');
     }
+    
+    public function routeNotificationFor($notification)
+    {
+        return $this->email; // Assuming the email column in your students table is called 'email'
+    }
 }

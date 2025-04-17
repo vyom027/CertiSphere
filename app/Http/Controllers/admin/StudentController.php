@@ -11,17 +11,106 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use League\Csv\Reader;
 use League\Csv\Statement;
+use Carbon\Carbon;
+
 class StudentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $students = Student::with('batch','department')->get();
 
-        return view('admin.students.student-list',compact('students'));
+    public function index(Request $request)
+    {
+        $departments = Department::all();
+        $divisions = Student::distinct('division')->pluck('division');
+    
+        // Fetch all batches to compute all possible semesters
+        $batches = Batch::all();
+    
+        $semesterBatchMap = [];
+        foreach ($batches as $batch) {
+            $startYear = $batch->start_year;
+            $currentYear = now()->year;
+            $yearsPassed = $currentYear - $startYear;
+            $semesters = $yearsPassed * 2;
+    
+            $currentMonth = now()->month;
+            if ($yearsPassed === 0) {
+                $semesters = ($currentMonth >= 7) ? 1 : 0;
+            } else {
+                if ($currentMonth >= 7) {
+                    $semesters++;
+                }
+            }
+    
+            if ($semesters > 0) {
+                $semesterBatchMap[$semesters] = $semesters;
+            }
+        }
+    
+        $uniqueSemesters = array_unique(array_keys($semesterBatchMap));
+        sort($uniqueSemesters);
+    
+        // Build student query with filters
+        $query = Student::with('department', 'batch');
+    
+        if ($request->filled('dept_id')) {
+            $query->where('dept_id', $request->dept_id);
+        }
+    
+        if ($request->filled('division')) {
+            $query->where('division', $request->division);
+        }
+    
+        if ($request->filled('semester')) {
+            $targetSemester = (int)$request->semester;
+            $currentYear = now()->year;
+            $currentMonth = now()->month;
+    
+            $yearsBack = intdiv($targetSemester, 2);
+            $startYear = $currentYear - $yearsBack;
+    
+            // Adjust for odd semesters before July
+            if ($targetSemester % 2 != 0 && $currentMonth < 7) {
+                $startYear--;
+            }
+    
+            $query->whereHas('batch', function ($q) use ($startYear) {
+                $q->where('start_year', $startYear);
+            });
+        }
+    
+        $students = $query->paginate(30)->appends($request->except('page'));
+
+    
+        return view('admin.students.student-list', compact('students', 'departments', 'divisions', 'uniqueSemesters'));
     }
+    
+
+    private function calculateSemester($startYear)
+    {
+        $currentYear = now()->year;
+        $yearsPassed = $currentYear - $startYear;
+        $semesters = $yearsPassed * 2;
+
+        if ($yearsPassed === 0) {
+            $currentMonth = now()->month;
+            if ($currentMonth >= 7) {
+                $semesters = 1;
+            } else {
+                $semesters = 0;
+            }
+        } else {
+            // If the current year is past the start year, check if a semester has passed in the current year
+            $currentMonth = now()->month;
+            if ($currentMonth >= 7) {
+                $semesters++;
+            }
+        }
+
+        return $semesters;
+    }
+
 
     /**
      * Show the form for creating a new resource.
@@ -278,7 +367,6 @@ class StudentController extends Controller
             $student->batch_id = $row['Batch'];
             $student->division = $row['Division'];
             $student->profile_picture = $row['Profile Picture'];
-            // Save student
             $student->save();
         }
     }

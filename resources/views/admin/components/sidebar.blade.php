@@ -57,7 +57,6 @@
           <ul class="sub-options d-none ms-4">
             <li><a href="{{ route('students.create')}}" class="nav-link"><i class="fas fa-user-plus"></i>Add Student</a></li>
             <li><a href="{{ route('students.index')}}" class="nav-link"><i class="fas fa-list"></i>Student List</a></li>
-            <li><a href="#" class="nav-link"><i class="fas fa-file-alt"></i>Student List for Selected Course Enrollment</a></li>
           </ul>
         </li>
       
@@ -100,8 +99,9 @@
           </a>
           <!-- Sub-options -->
           <ul class="sub-options d-none ms-4">
-            <li><a href="{{ route('admin.certificate-requests.create')}}" class="nav-link"><i class="fas fa-plus"></i>Notify For Certificate Upload</a></li>
+            <li><a href="{{ route('admin.certificate-requests.create')}}" class="nav-link"><i class="fas fa-plus"></i>Request Certificate</a></li>
             <li><a href="{{ route('admin.certificate-requests.index')}}" class="nav-link"><i class="fas fa-list"></i>Certificate List</a></li>
+            <li><a href="{{ route('admin.certificate-requests.list')}}" class="nav-link"><i class="fas fa-list"></i>Certificate Collection</a></li>
           </ul>
         </li>
 
@@ -160,8 +160,8 @@
           </a>
           <!-- Sub-options -->
           <ul class="sub-options d-none ms-4">
-            <li><a href="#" class="nav-link"><i class="fas fa-file-export"></i>Generate Report</a></li>
-            <li><a href="#" class="nav-link"><i class="fas fa-download"></i>Export Report</a></li>
+            <li><a href="{{ route('admin.certificate.report') }}" class="nav-link"><i class="fas fa-file-export"></i>Generate Report</a></li>
+            {{-- <li><a href="#" class="nav-link"><i class="fas fa-download"></i>Export Report</a></li> --}}
           </ul>
         </li>
       

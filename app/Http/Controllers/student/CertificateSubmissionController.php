@@ -15,6 +15,16 @@ use Illuminate\Support\Facades\Validator;
 
 class CertificateSubmissionController extends Controller
 {
+    public function index()
+    {
+        $student = Auth::user()->student;
+        $submissions = CertificateSubmission::with('request')
+        ->where('enrollment_no', $student->enrollment_no)
+        ->paginate(10); // You can change 10 to any number per page
+    
+        return view('user.certificate_requests.list', compact('submissions'));
+    }
+    
 
     public function showAvailableRequests()
     {
@@ -39,7 +49,7 @@ class CertificateSubmissionController extends Controller
     public function upload(Request $request)
     {
         $student = Auth::user()->student;
-        
+    
         // Validate the incoming request
         $validator = Validator::make($request->all(), [
             'certificate_request_id' => 'required|exists:certificate_requests,id',
@@ -78,22 +88,37 @@ class CertificateSubmissionController extends Controller
         $originalFileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $fileName = $originalFileName . '.' . $extension;
     
-        $filePath = $file->storeAs($path, $fileName, 'public');
+        // Check if submission already exists
+        $certificateSubmission = CertificateSubmission::where('certificate_request_id', $certificateRequestId)
+            ->where('enrollment_no', $enrollmentNo)
+            ->first();
     
-        $certificateSubmission = new CertificateSubmission();
-        $certificateSubmission->certificate_request_id = $certificateRequestId;
-        $certificateSubmission->enrollment_no = $enrollmentNo;
-        $certificateSubmission->batch_id = $batchId;
-        $certificateSubmission->dept_id = $deptId;
-        $certificateSubmission->division = $division;
-        $certificateSubmission->certificate_file = "storage/{$filePath}";
+        // If already submitted before, delete old file
+        if ($certificateSubmission && $certificateSubmission->certificate_file && file_exists(public_path($certificateSubmission->certificate_file))) {
+            unlink(public_path($certificateSubmission->certificate_file));
+        }
+    
+        // Move the new file
+        $file->move(public_path($path), $fileName);
+        $filePath = $path . $fileName;
+    
+        if (!$certificateSubmission) {
+            $certificateSubmission = new CertificateSubmission();
+            $certificateSubmission->certificate_request_id = $certificateRequestId;
+            $certificateSubmission->enrollment_no = $enrollmentNo;
+            $certificateSubmission->batch_id = $batchId;
+            $certificateSubmission->dept_id = $deptId;
+            $certificateSubmission->division = $division;
+        }
+    
+        // Update or set values
+        $certificateSubmission->certificate_file = $filePath;
         $certificateSubmission->submitted_at = Carbon::now();
-        $certificateSubmission->status = 'Not Approved'; 
+        $certificateSubmission->status = 'Not Approved'; // Reset status
         $certificateSubmission->save();
     
         return redirect()->back()->with('success', 'Certificate file uploaded successfully.');
     }
-
     
 
 }

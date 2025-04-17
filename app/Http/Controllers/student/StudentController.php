@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\student;
 
+use Webklex\PHPIMAP\ClientManager;
+
 use App\Models\Batch;
 use App\Models\Department;
 use App\Models\Student;
@@ -293,5 +295,4 @@ class StudentController extends Controller
         return view('user.search-results', compact('courses', 'query'));
     }
 
-    
 }

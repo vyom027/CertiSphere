@@ -20,4 +20,10 @@ class CertificateRequest extends Model
         return $this->belongsTo(Batch::class, 'batch_id', 'batch_id');
     }
 
+    public function certificateSubmissions()
+    {
+        return $this->hasMany(CertificateSubmission::class, 'certificate_request_id');
+    }
+
+
 }

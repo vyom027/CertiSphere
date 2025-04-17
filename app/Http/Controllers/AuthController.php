@@ -98,8 +98,8 @@ class AuthController extends Controller
             return redirect()->back()->with('password_error', 'Incorrect password.');
         }
 
-        // Log in with default guard (web)
-        Auth::login($user);
+        
+        Auth::login($user, $request->filled('remember'));
         Session::put('user_email', $user->email);
 
         if ($user->user_type === 'admin') {
@@ -158,7 +158,7 @@ class AuthController extends Controller
     public function adminDashboard()
     {
         if (!Auth::check() || Auth::user()->user_type !== 'admin') {
-            return redirect()->route('login')->with('error', 'Unauthorized access.');
+            return redirect()->route('login-student')->with('error', 'Unauthorized access.');
         }
 
         return view('admin.dashboard');
@@ -178,7 +178,7 @@ class AuthController extends Controller
         Session::forget('student_logged_in');
         Session::forget('student_name');
         Session::forget('student_profile');
-
+        Session::forget('mail_password');
         return redirect()->route('student.index')->with('logout_msg', 'Student logged out successfully!');
     }
 

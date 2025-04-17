@@ -111,7 +111,15 @@
 
                   </div>
          
-                  <a href="{{ route('password.request') }}" class="login__forgot">Forgot your password?</a>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <div class="form-check" style="margin-top: 20px;margin-left:10px">
+                        <input class="form-check-input" type="checkbox" id="rememberMe" name="remember" checked>
+                        <label class="form-check-label" for="rememberMe">
+                           Remember Me
+                        </label>
+                      </div>
+                      <a href="{{ route('password.request') }}" class="login__forgot">Forgot your password?</a>
+                    </div>
 
          
                   <button type="submit" class="login__button">Login</button>

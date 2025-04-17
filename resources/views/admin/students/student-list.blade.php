@@ -4,33 +4,27 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="apple-touch-icon" sizes="76x76" href="{{asset('admin//apple-icon.png') }}">
-  <link rel="icon" type="image/png" href="{{asset('admin//favicon.png') }}">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-  
+  @include('admin.components.links')
   <title>
     Student List | LJKU
   </title>
-  <!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- Bootstrap Bundle JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!--     Fonts and icons     -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
-  <!-- Nucleo Icons -->
-  <link href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-icons.css" rel="stylesheet" />
-  <link href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-svg.css" rel="stylesheet" />
-  <!-- Font Awesome Icons -->
-  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  
   <style>
     .dropdown-menu {
-  top: 100% !important;
-  left: 0 !important;
-  transform: translateY(-125px) !important;
+      top: 100% !important;
+      left: 0 !important;
+      transform: translateY(-125px) !important;
+    }
+  
+    .pagination-wrapper nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
   </style>
+  
   <!-- CSS Files -->
   <link id="pagestyle" href="{{ asset('admin/css/argon-dashboard.css?v=2.1.0') }} " rel="stylesheet" />
 </head>
@@ -43,6 +37,7 @@
     </aside>
     <main class="main-content position-relative border-radius-lg ">
 
+ 
     <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl " id="navbarBlur" data-scroll="false">
         <div class="container-fluid py-1 px-3">
           <nav aria-label="breadcrumb">
@@ -101,81 +96,133 @@
                         <!-- Add Student Button -->
                         <a href="{{ route('students.create') }}" class="btn btn-primary btn-sm">Add Student</a>
                     </div>
-                </div>
+                  
+               </div>
+            </div>
+            
+            <div class="card-body pb-3">
+              <div class="row">
+                <form method="GET" action="{{ route('students.index') }}">
+                  <div class="row mb-3">
+                    <div class="col-md-3">
+                      <label for="department_filter">Department</label>
+                      <select id="department_filter" name="dept_id" class="form-control" onchange="this.form.submit()">
+                        <option value="">All</option>
+                        @foreach($departments as $department)
+                          <option value="{{ $department->dept_id }}" {{ request('dept_id') == $department->dept_id ? 'selected' : '' }}>
+                            {{ $department->name }}
+                          </option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="col-md-2">
+                      <label for="semester_filter">Semester</label>
+                      <select name="semester" class="form-control" onchange="this.form.submit()">
+                          <option value="">All</option>
+                          @foreach($uniqueSemesters as $semester)
+                              <option value="{{ $semester }}"
+                                  {{ request('semester') == $semester ? 'selected' : '' }}>
+                                  Semester {{ $semester }}
+                              </option>
+                          @endforeach
+                      </select>
+                  </div>
+                  
+                    <div class="col-md-3">
+                      <label for="division_filter">Division</label>
+                      <select id="division_filter" name="division" class="form-control" onchange="this.form.submit()">
+                        <option value="">All</option>
+                        @foreach($divisions as $division)
+                          <option value="{{ $division }}" {{ request('division') == $division ? 'selected' : '' }}>
+                            {{ $division }}
+                          </option>
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                </form>
+                
+              </div>
             </div>
 
             <div class="card-body px-0 pt-0 pb-0">
-                <div class="table-responsive p-0">
-                    
-                    <table class="table align-items-center"  >
-                        <thead>
-                          <tr>
-                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-3">Index</th>
-                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-1">Name</th>
-                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Enrollment No.</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Department</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Mobile No.</th>
-                            <th class="text-secondary opacity-7"></th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                            @php $i = 1;@endphp
-                            @foreach($students as $student )
-                          <tr >
-                            <td class="align-middle ps-2">
-                                <span class="text-secondary text-xs font-weight-bold ps-3">{{$i}}</span>
-                              </td>
-                            <td>
-                              <div class="d-flex px-0 py-1">
-                                <div class="d-flex flex-column justify-content-center">
-                                  <h6 class="mb-0 text-sm">{{ $student->first_name }} {{ $student->last_name }}</h6>
-                                  <p class="text-xs text-secondary mb-0">{{ $student->email }}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                              
-                              <p class="text-xs font-weight-bold mb-0">{{ $student->enrollment_no }}</p>
-                            </td>
-                            <td class="align-middle text-center text-sm">
-                              
-                              <p class="text-xs font-weight-bold mb-0">{{ $student->department->name }}</p>
-                              <p class="text-xs text-secondary mb-0">{{ $student->batch->start_year }} - {{ $student->batch->end_year }}</p>
-                            </td>
-                            <td class="align-middle text-center">
-                              <p class="text-xs font-weight-bold mb-0">+91 {{ $student->phone_number }}</p>
-                            </td>
-                            <td class="align-middle text-center">
-                              <a href="" class="text-info mx-2" title="Show">
-                                  <i class="fas fa-eye"></i>
-                              </a>
-                              <a href="{{ route('students.edit', ['id' => $student->enrollment_no]) }}" class="text-success mx-2" title="Edit">
-                                  <i class="fas fa-edit"></i>
-                              </a>
-                              <form action="{{ route('students.destroy', ['id' => $student->enrollment_no]) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button style="border: none;background:none;" href="#" class="text-danger mx-2" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                              </form>
-                          </td>
-                          
-                            @php $i++; @endphp
-                          </tr>
-                          @endforeach
-                        </tbody>
-                    </table>
-                </div>
+              <div class="table-responsive p-0">
+                <table class="table align-items-center">
+                  <thead>
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-3">Index</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-1">Name</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Enrollment No.</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Department</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Mobile No.</th>
+                      <th class="text-secondary opacity-7"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @foreach($students as $student)
+                    <tr>
+                      <td class="align-middle ps-2">
+                        <span class="text-secondary text-xs font-weight-bold ps-3">{{$loop->iteration}}</span>
+                      </td>
+                      <td>
+                        <div class="d-flex px-0 py-1">
+                          <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm">{{ $student->first_name }} {{ $student->last_name }}</h6>
+                            <p class="text-xs text-secondary mb-0">{{ $student->email }}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <p class="text-xs font-weight-bold mb-0">{{ $student->enrollment_no }}</p>
+                      </td>
+                      <td class="align-middle text-center text-sm">
+                        <p class="text-xs font-weight-bold mb-0">{{ $student->department->name }}</p>
+                        <p class="text-xs text-secondary mb-0">{{ $student->batch->start_year }} - {{ $student->batch->end_year }}</p>
+                      </td>
+                      <td class="align-middle text-center">
+                        <p class="text-xs font-weight-bold mb-0">+91 {{ $student->phone_number }}</p>
+                      </td>
+                      <td class="align-middle text-center">
+                        <a href="" class="text-info mx-2" title="Show">
+                          <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{{ route('students.edit', ['id' => $student->enrollment_no]) }}" class="text-success mx-2" title="Edit">
+                          <i class="fas fa-edit"></i>
+                        </a>
+                        <form action="{{ route('students.destroy', ['id' => $student->enrollment_no]) }}" method="POST" style="display:inline;">
+                          @csrf
+                          @method('DELETE')
+                          <button style="border: none;background:none;" class="text-danger mx-2" title="Delete">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                    @endforeach
+                  </tbody>
+                </table>
+            
+                <!-- ✅ Properly Centered Pagination -->
+                <div class="container-fluid">
+                  <div class="row">
+                      <div class="col-12 text-center">
+                          <nav aria-label="Page navigation">
+                              {{ $students->appends(request()->except('page'))->links() }}
+                          </nav>
+                      </div>
+                  </div>
               </div>
-            </div>
+              
+                
+              </div> <!-- .table-responsive -->
+            </div> <!-- .card-body -->
           </div>
         </div>
       </div>
-    </main>
+    </div>
+  </main>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-
+   
 </body>
 </html>

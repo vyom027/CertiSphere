@@ -24,6 +24,8 @@ class IsAdmin
             return $next($request);
         }
 
+        abort(403);
+
         return redirect('/login')->with('error', 'Unauthorized access.');
     }
 

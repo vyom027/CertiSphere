@@ -6,7 +6,7 @@
     <div class="container">
         <a class="navbar-brand" href="{{route('student.index')}}">
             <i class="bi-back"></i>
-            <span>Certisphere</span>
+            <span>CertiSphere</span>
         </a>
         
             <div class="d-lg-none ms-auto me-4">
@@ -32,14 +32,15 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link click-scroll" href="#section_5">Notifications</a>
+                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#mailLoginModal">Mails</a>
                 </li>
+                
                 <li class="nav-item">
                     <a class="nav-link click-scroll" href="#section_5">Help</a>
                 </li>
 
 
-                <li class="nav-item dropdown">
+                {{-- <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarLightDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">Pages</a>
 
                     <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="navbarLightDropdownMenuLink">
@@ -47,7 +48,7 @@
 
                         <li><a class="dropdown-item" href="contact.html">Contact Form</a></li>
                     </ul>
-                </li>
+                </li> --}}
             </ul>
 
             @if(Session::get('student_logged_in'))
@@ -75,3 +76,53 @@
         </div>
     </div>
 </nav>
+
+<!-- Mail Password Modal -->
+<!-- Link to trigger modal (always visible) -->
+
+<!-- Modal to enter password -->
+<div class="modal fade" id="mailLoginModal" tabindex="-1" aria-labelledby="mailLoginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{{ route('mailbox.connect') }}" method="POST">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mailLoginModalLabel">Enter Mailbox Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="password" name="password" class="form-control" 
+                        placeholder="Enter your email password" 
+                        value="{{ session('mail_password') ? session('mail_password') : '' }}" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Connect</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Check if password is already stored in session
+        const mailPassword = "{{ session('mail_password') }}";
+
+        // Event listener for "Mails" link
+        const mailLink = document.getElementById('mailLink');
+
+        if (mailPassword) {
+            // If password is in session, redirect to mailbox directly
+            mailLink.addEventListener('click', function (event) {
+                event.preventDefault();
+                window.location.href = "{{ route('mailbox.connect') }}"; // Redirect to the mailbox
+            });
+        } else {
+            // If no password, show the modal on click
+            mailLink.addEventListener('click', function (event) {
+                event.preventDefault();
+                $('#mailLoginModal').modal('show'); // Show the password modal
+            });
+        }
+    });
+</script>

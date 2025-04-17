@@ -25,6 +25,7 @@ class IsStudent
         if (Auth::check() && Auth::user()->user_type === 'student') {
             return $next($request);
         }
+        abort(403);
 
         return redirect()->route('login-student')->with('error', 'Unauthorized access.');
     }

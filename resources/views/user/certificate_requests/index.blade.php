@@ -16,6 +16,9 @@
         <link href="{{ asset('student/css/bootstrap-icons.css')}}" rel="stylesheet">
         <link href="{{ asset('student/css/templatemo-topic-listing.css')}}" rel="stylesheet">
 
+        <!-- Meta for CSRF token -->
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
         <style>
             .card {
                 border-radius: 8px;
@@ -39,7 +42,7 @@
     
     <body id="top">
     
-        @include('user.components.navbar')
+            @include('user.components.navbar')
         @if(session('success'))
             <script>
                 Swal.fire({
@@ -52,15 +55,21 @@
         @endif
 
         <div class="container py-5" style="margin-top: 100px;">
-            <div class="row">
-                <div class="col-12">
-                    <h2 class="mb-4 page-header">Certificate Requests</h2>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <h2 class="page-header">Certificate Requests</h2>
                 </div>
-            </div>
+                <div class="col-md-6 text-end">
+                    <a href="{{ route('student.certificate-submissions.index') }}" class="btn btn-primary">
+                        <i class="fas fa-file-alt me-1"></i> My Certificates
+                                </a>
+                            </div>
+                        </div>
+            
 
-            @if($requests->isEmpty())
+                        @if($requests->isEmpty())
                 <div class="row">
-                    <div class="col-12">
+                            <div class="col-12">
                         <div class="card">
                             <div class="card-body text-center py-5">
                                 <i class="bi bi-file-earmark-x text-muted" style="font-size: 3rem;"></i>
@@ -68,26 +77,26 @@
                                 <p class="text-muted">You don't have any certificate requests at the moment.</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-            @else
+                                </div>
+                            </div>
+                        @else
                 <div class="row">
-                    <div class="col-12">
+                            <div class="col-12">
                         <div class="card">
                             <div class="card-body p-0">
-                                <div class="table-responsive">
+                                    <div class="table-responsive">
                                     <table class="table certificate-table mb-0">
                                         <thead class="bg-light">
-                                            <tr>
+                                                <tr>
                                                 <th class="ps-4">Course Name</th>
-                                                <th>Status</th>
-                                                <th>Description</th>
+                                                    <th>Status</th>
+                                                    <th>Description</th>
                                                 <th>Date</th>
                                                 <th class="text-end pe-4">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($requests as $request)
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($requests as $request)
                                                 @if($request->status !== 'Closed') 
                                                 <tr>
                                                     <td class="ps-4 fw-medium">{{ $request->course_name }}</td>
@@ -98,10 +107,10 @@
                                                             <span class="badge bg-success">Close</span>
                                                        
                                                         @endif
-                                                    </td>
+                                                        </td>
                                                     <td class="text-truncate" style="max-width: 250px;" title="{{ $request->description }}">
                                                         {{ $request->description }}
-                                                    </td>
+                                                        </td>
                                                     <td>{{ $request->created_at->format('d M, Y') }}</td>
                                                     <td class="text-end pe-4">
                                                     
@@ -125,13 +134,13 @@
                                                             </button>
                                                         @endif
                                                     
-                                                    </td>
+                                                        </td>
                                                     
-                                                </tr>
+                                                    </tr>
                                                 @endif
-                                            @endforeach
-                                        </tbody>
-                                    </table>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
                                     <!-- Upload Modal -->
                                 </div>
                             </div>
@@ -175,7 +184,7 @@
                                           @endforeach
                                       </ul>
                                       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                  </div>
+                                    </div>
                                   <script>
                                       // Automatically open modal if there are errors
                                       document.addEventListener('DOMContentLoaded', function() {
@@ -184,7 +193,7 @@
                                   </script>
                                   @endif
                                 </div>
-                                
+
                                 <div class="modal-footer">
                                   <button type="submit" class="btn btn-primary">Upload</button>
                                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -211,18 +220,31 @@
         <script src="{{ asset('student/js/click-scroll.js')}}"></script>
         <script src="{{ asset('student/js/custom.js')}}"></script>
         <script>
+            // Add CSRF token to all AJAX requests
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
 
-                const uploadModal = document.getElementById('uploadModal');
-                uploadModal.addEventListener('show.bs.modal', function (event) {
-                    const button = event.relatedTarget;
+            const uploadModal = document.getElementById('uploadModal');
+            uploadModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
 
-                    const courseName = button.getAttribute('data-course-name');
-                    const requestId = button.getAttribute('data-request-id');
+                const courseName = button.getAttribute('data-course-name');
+                const requestId = button.getAttribute('data-request-id');
 
-                    document.getElementById('courseName').value = courseName;
-                    document.getElementById('modalRequestId').value = requestId;
-                });
+                document.getElementById('courseName').value = courseName;
+                document.getElementById('modalRequestId').value = requestId;
+            });
 
+            // Handle form submission
+            $('form').on('submit', function() {
+                if (!$('input[name="_token"]').val()) {
+                    location.reload();
+                    return false;
+                }
+            });
         </script>
     </body>
 </html>

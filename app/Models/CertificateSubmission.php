@@ -28,10 +28,11 @@ class CertificateSubmission extends Model
 
 
 
-    public function certificateRequest()
+    public function request()
     {
-        return $this->belongsTo(CertificateRequest::class);
+        return $this->belongsTo(CertificateRequest::class, 'certificate_request_id');
     }
+
 
     public function batch()
     {
@@ -41,5 +42,9 @@ class CertificateSubmission extends Model
     public function department()
     {
         return $this->belongsTo(Department::class, 'dept_id', 'dept_id');
+    }
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'enrollment_no', 'enrollment_no');
     }
 }

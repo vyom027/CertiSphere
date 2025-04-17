@@ -10,10 +10,12 @@ use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\student\StudentController as StudentStudentController;
 use App\Http\Controllers\student\StudentPageController;
 use App\Http\Controllers\Admin\CollegeSelectedCourseController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\student\CertificateSubmissionController;
+use App\Http\Controllers\student\MailboxController;
 use App\Models\CertificateRequest;
 use Illuminate\Support\Facades\Route;
-
+use SebastianBergmann\CodeCoverage\Report\Xml\Report;
 
 // Route::get('/courses', [CourseController::class, 'index']);
 
@@ -33,20 +35,15 @@ Route::get('/login', [AuthController::class, 'showLoginFormStudent'])->name('log
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/', [StudentStudentController::class, 'indexHome'])->name('student.index');
 
-Route::prefix('admin')->group(function () {
-    // Admin Dashboard (middleware 'auth' ensures only logged-in users can access this)
-    Route::get('/dashboard', [AuthController::class, 'adminDashboard'])->name('dashboard')->middleware('auth');
-    
-    // Login Routes
-    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
-    
-    // Logout Route
-    Route::post('/logout', [AuthController::class, 'logoutAdmin'])->name('logout');
-});
+
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login-student');
+Route::post('/login', [AuthController::class, 'login']);
 // Admin Routes with Authentication Middleware
 Route::prefix('admin')->middleware(['auth', 'is_admin'])->group(function () {
 
+    Route::get('/dashboard', [AuthController::class, 'adminDashboard'])->name('dashboard')->middleware('auth');
+
+    Route::post('/logout', [AuthController::class, 'logoutAdmin'])->name('logout');
     // Batch Routes
     Route::controller(BatchController::class)->group(function () {
         Route::get('/batch', 'index')->name('batch.index'); 
@@ -123,6 +120,14 @@ Route::prefix('admin')->middleware(['auth', 'is_admin'])->group(function () {
         Route::get('/certificate-requests/{id}/edit', 'edit')->name('admin.certificate-requests.edit');
         Route::put('/certificate-requests/{id}', 'update')->name('admin.certificate-requests.update');
         Route::delete('/certificate-requests/{id}', 'destroy')->name('admin.certificate-requests.destroy');
+        Route::get('/certificate-collection', 'list')->name('admin.certificate-requests.list');
+        Route::post('/admin/certificate_requests/{id}/approve','approveCertificate')->name('admin.certificate_requests.approve');
+        Route::post('/admin/certificate_requests/{id}/reject', 'rejectCertificate')->name('admin.certificate_requests.reject');
+    });
+    Route::controller(ReportController::class)->group(function () {
+        Route::get('/certificate-report','certificateReport')->name('admin.certificate.report');
+        Route::post('/submission-report', 'downloadSubmissionReport')->name('admin.submission.report');
+
     });
 
 });
@@ -149,7 +154,10 @@ Route::prefix('student')->middleware(['auth', 'is_student'])->group(function () 
         Route::get('/certificate-requests', 'showAvailableRequests')->name('certificate-requests.index');
         Route::post('/certificate/upload', 'upload')->name('student.certificate.upload');
         Route::get('/my-certificates','index')->name('student.certificate-submissions.index');
-
+        Route::get('/certificate/{file}',  'viewCertificate')->name('student.certificate.view');
     });
+
+    Route::get('/mailbox', [MailboxController::class, 'showForm'])->name('mailbox.form');
+    Route::post('/mailbox/connect', [MailboxController::class, 'connect'])->name('mailbox.connect');
 });
 
